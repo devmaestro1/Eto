@@ -51,7 +51,7 @@ namespace Eto.Forms
 	/// </summary>
 	public abstract class Window : Panel
 	{
-		new IHandler Handler { get { return (IHandler)base.Handler; } }
+		new IHandler Handler => (IHandler)base.Handler;
 
 		#region Events
 
@@ -204,6 +204,19 @@ namespace Eto.Forms
 			EventLookup.Register<Window>(c => c.OnWindowStateChanged(null), WindowStateChangedEvent);
 			EventLookup.Register<Window>(c => c.OnLogicalPixelSizeChanged(null), LogicalPixelSizeChangedEvent);
 		}
+		
+		/// <summary>
+		/// Gets the window at the specified logical screen point.
+		/// </summary>
+		/// <remarks>
+		/// This should get the first Eto window directly underneath the specified point.
+		/// </remarks>
+		/// <param name="point">Point to find the window at</param>
+		/// <returns>Instance of a Window (Form or Dialog) underneath the specified point, or null if none found</returns>
+		public static Window FromPoint(PointF point)
+		{
+			return Platform.Instance.CreateShared<IWindowHandler>().FromPoint(point);
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Eto.Forms.Window"/> class.
@@ -352,8 +365,8 @@ namespace Eto.Forms
 		/// Gets or sets the menu bar for this window
 		/// </summary>
 		/// <remarks>
-		/// Some platforms have a global menu bar (e.g. ubuntu, OS X).
-		/// When the winow is in focus, the global menu bar will be changed to reflect the menu assigned.
+		/// Some platforms have a global menu bar (e.g. Ubuntu, OS X).
+		/// When the window is in focus, the global menu bar will be changed to reflect the menu assigned.
 		/// </remarks>
 		/// <value>The menu.</value>
 		public virtual MenuBar Menu
@@ -845,6 +858,22 @@ namespace Eto.Forms
 			/// </remarks>
 			/// <value><c>true</c> to auto size the window when its content changes, <c>false</c> to only auto size when first created</value>
 			bool AutoSize { get; set; }
+		}
+		
+		/// <summary>
+		/// Handler interface for static methods of <see cref="Window"/>
+		/// </summary>
+		public interface IWindowHandler
+		{
+			/// <summary>
+			/// Gets the window at the specified logical screen point.
+			/// </summary>
+			/// <remarks>
+			/// This should get the first Eto window directly underneath the specified point.
+			/// </remarks>
+			/// <param name="point">Point to find the window at</param>
+			/// <returns>Instance of a Window (Form or Dialog) underneath the specified point, or null if none found</returns>
+			Window FromPoint(PointF point);
 		}
 
 		#endregion

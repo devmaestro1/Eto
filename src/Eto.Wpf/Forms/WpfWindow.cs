@@ -227,7 +227,9 @@ namespace Eto.Wpf.Forms
 					Control.Activated += (sender, e) => Callback.OnGotFocus(Widget, EventArgs.Empty);
 					break;
 				case Eto.Forms.Control.LostFocusEvent:
-					Control.Deactivated += (sender, e) => Callback.OnLostFocus(Widget, EventArgs.Empty);
+					// Use AsyncInvoke here otherwise calling Close() during LostFocus does not work as expected
+					// and can lead to the z-order of windows not being correct.
+					Control.Deactivated += (sender, e) => Application.Instance.AsyncInvoke(() => Callback.OnLostFocus(Widget, EventArgs.Empty));
 					break;
 				case Window.LocationChangedEvent:
 					Control.LocationChanged += (sender, e) => Callback.OnLocationChanged(Widget, EventArgs.Empty);
@@ -279,6 +281,10 @@ namespace Eto.Wpf.Forms
 			e.Cancel = args.Cancel;
 			IsApplicationClosing = !e.Cancel && willShutDown;
 			IsClosing = !e.Cancel;
+			if (!e.Cancel)
+			{
+				InternalClosing();
+			}
 		}
 
 		float LastPixelSize
@@ -400,6 +406,10 @@ namespace Eto.Wpf.Forms
 				toolBarHolder.Content = toolBar != null ? toolBar.ControlObject : null;
 			}
 		}
+		
+		protected virtual void InternalClosing()
+		{
+		}
 
 		public void Close()
 		{
@@ -407,7 +417,9 @@ namespace Eto.Wpf.Forms
 			{
 				// prevent crash if we call this more than once..
 				if (!IsClosing)
+				{
 					Control.Close();
+				}
 			}
 			else
 				Visible = false;

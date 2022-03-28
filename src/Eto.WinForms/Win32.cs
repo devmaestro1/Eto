@@ -285,6 +285,12 @@ namespace Eto
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool ShowWindow(IntPtr hWnd, SW nCmdShow);
+		
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetActiveWindow();
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -492,5 +498,8 @@ namespace Eto
 		
 		[DllImport("gdi32.dll")]
 		public static extern bool OffsetWindowOrgEx(IntPtr hdc, int nXOffset, int nYOffset, ref POINT lpPoint);
+		
+		[DllImport("user32.dll")]
+		public static extern IntPtr WindowFromPoint(POINT lpPoint);
 	}
 }

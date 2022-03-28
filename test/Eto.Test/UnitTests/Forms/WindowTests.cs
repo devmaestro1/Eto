@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Specialized;
 using Eto.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Eto.Test.UnitTests.Forms
 {
@@ -27,18 +28,21 @@ namespace Eto.Test.UnitTests.Forms
 				var rightPanel = new StackLayout { Orientation = Orientation.Horizontal };
 
 				var autoSize = new CheckBox { Text = "AutoSize", Checked = window.AutoSize };
-				autoSize.CheckedChanged += (sender, e) => {
+				autoSize.CheckedChanged += (sender, e) =>
+				{
 					window.AutoSize = autoSize.Checked == true;
 				};
 
 				var addBottomButton = new Button { Text = "Add bottom control" };
-				addBottomButton.Click += (sender, e) => {
+				addBottomButton.Click += (sender, e) =>
+				{
 					bottomPanel.Items.Add(new Panel { Size = new Size(20, 20) });
 					autoSize.Checked = window.AutoSize;
 				};
 
 				var addRightButton = new Button { Text = "Add right control" };
-				addRightButton.Click += (sender, e) => {
+				addRightButton.Click += (sender, e) =>
+				{
 					rightPanel.Items.Add(new Panel { Size = new Size(20, 20) });
 					autoSize.Checked = window.AutoSize;
 				};
@@ -92,7 +96,7 @@ namespace Eto.Test.UnitTests.Forms
 				const string infoText = "Click to change text.\n";
 				var label = new Label();
 				label.TextColor = Colors.White;
-				label.Text = infoText + Utility.LoremText;
+				label.Text = infoText + Utility.LoremTextWithTwoParagraphs;
 
 				Window window = useForm ? (Window)new Form { ShowActivated = false } : new Dialog();
 				window.AutoSize = true;
@@ -119,7 +123,8 @@ namespace Eto.Test.UnitTests.Forms
 						window.Height = 150;
 				}
 
-				label.MouseDown += (sender, e) => {
+				label.MouseDown += (sender, e) =>
+				{
 					label.Text = infoText + Utility.GenerateLoremText(new Random().Next(200));
 				};
 
@@ -250,6 +255,56 @@ namespace Eto.Test.UnitTests.Forms
 
 				return layout;
 			});
+		}
+
+		[Test, ManualTest]
+		public void WindowFromPointShouldReturnWindowUnderPoint()
+		{
+			ManualForm("Move your mouse, it should show the title of the window under the mouse pointer",
+			form =>
+			{
+				var content = new Panel { MinimumSize = new Size(100, 100) };
+				var timer = new UITimer { Interval = 0.5 };
+				timer.Elapsed += (sender, e) =>
+				{
+					var window = Window.FromPoint(Mouse.Position);
+					content.Content = $"Window: {window?.Title}";
+				};
+				timer.Start();
+				form.Closed += (sender, e) =>
+				{
+					timer.Stop();
+				};
+				form.Title = "Test Form";
+				return content;
+			}
+			);
+		}
+
+		[Test, ManualTest]
+		public void WindowShouldCloseOnLostFocusWithoutHidingParent()
+		{
+			ManualForm("Click on this window after the child is shown,\nthe form and the main form should not go behind other windows",
+			form =>
+			{
+				var content = new Panel { MinimumSize = new Size(100, 100) };
+				form.Shown += (sender, e) =>
+				{
+					var childForm = new Form
+					{
+						Title = "Child Form",
+						ClientSize = new Size(100, 100),
+						Owner = form
+					};
+					childForm.MouseDown += (s2, e2) => childForm.Close();
+					childForm.LostFocus += (s2, e2) => childForm.Close();
+					childForm.Show();
+				};
+				form.Title = "Test Form";
+				form.Owner = Application.Instance.MainForm;
+				return content;
+			}
+			);
 		}
 	}
 }

@@ -41,6 +41,9 @@ namespace Eto.Wpf.Forms.Printing
 
 		public DialogResult ShowDialog(Window parent)
 		{
+			if (parent?.HasFocus == false)
+				parent.Focus();
+
 			var print = new swc.PrintDialog();
 			print.SetEtoSettings(PrintSettings);
 			Control.Owner = parent?.ToNative();
@@ -64,6 +67,7 @@ namespace Eto.Wpf.Forms.Printing
 					
 					Control.Document = fixedDocument;
 					Control.ShowDialog();
+					WpfFrameworkElementHelper.ShouldCaptureMouse = false;
 				}
 			}
 			finally

@@ -16,7 +16,7 @@ env:
 jobs:
   build-windows:
 
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
@@ -92,7 +92,7 @@ jobs:
       with:
         mono-version: latest
         xamarin-mac-version: latest
-        xcode-version: 13.1
+        xcode-version: latest
     
     - name: Import code signing certificate
       if: github.event_name != 'pull_request'
